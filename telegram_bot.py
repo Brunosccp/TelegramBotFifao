@@ -7,6 +7,12 @@ import telegram
 import logging
 import os
 from os.path import join, dirname
+from controller import Controller
+
+from player import Player
+from predictor import Predictor
+from enums import Converter
+import time
 
 TOKEN='971659272:AAF03CZJzlo0uLbuGJ6kprFW9dpTRttVFws'
 
@@ -19,13 +25,47 @@ dispatcher = updater.dispatcher
 
 env = os.environ.get('ENV', 'development')
 
-try:
-    def echo(bot, update):
-        texto = update.message.text[::-1] + '<b> xaxa oioi</b>'
-        print(texto)
-        print(update.message.from_user.username)
+controller = Controller()
+player = Player()
+predictor = Predictor()
 
+try:
+    def sayText(bot, update, texto):
         bot.send_message(chat_id=update.message.chat_id, text=texto, parse_mode=telegram.ParseMode.HTML)
+
+    def echo(bot, update):
+        goToNextStep = True
+
+        returnTxt = update.message.text
+        textos = controller.getText(returnTxt)
+
+        #when answer is None, means the answer was invalid
+        if textos == None:
+            textos = ["Cara, o que você escreveu não tem lógica, coesão, inteligência, digita de novo"]
+            goToNextStep = False
+        else: 
+            player.fill(returnTxt, controller.step)
+
+        for texto in textos:
+            bot.sendChatAction(chat_id=update.message.chat_id, action = telegram.ChatAction.TYPING)
+            time.sleep(2)
+            bot.send_message(chat_id=update.message.chat_id, text=texto, parse_mode=telegram.ParseMode.HTML, action = telegram.ChatAction.TYPING)
+
+        if goToNextStep:
+            controller.nextStep()
+
+        if controller.step == 5:
+            predictor = Predictor()
+
+            value = predictor.predict(player)
+            converter = Converter()
+            strValue = converter.convertStringValue(value)
+
+            texto = "O seu jogador vale aproximadamente " + strValue
+
+            bot.sendChatAction(chat_id=update.message.chat_id, action = telegram.ChatAction.TYPING)
+            time.sleep(2)
+            bot.send_message(chat_id=update.message.chat_id, text=texto, parse_mode=telegram.ParseMode.HTML, action = telegram.ChatAction.TYPING)
 
     echo_handler = MessageHandler(Filters.text, echo)
     dispatcher.add_handler(echo_handler)
@@ -42,3 +82,5 @@ try:
         updater.start_polling()
 except Exception as e:
     print(e)
+
+        
