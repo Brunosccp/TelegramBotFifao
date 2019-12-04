@@ -2,7 +2,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 
 from csvReader import CSVReader
-from enums import positions
 
 class Predictor:
 
@@ -32,5 +31,5 @@ class Predictor:
 		predictY = self.model.predict(polyPredictX)
 
 		print("X=%s, Predicted=%s" % (predictX, predictY))
-		
+
 		return predictY

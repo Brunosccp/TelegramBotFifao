@@ -1,4 +1,4 @@
-from enums import Converter
+from converter import Converter
 
 class Controller:
     
@@ -76,7 +76,6 @@ class Controller:
             return textos
             
     def answerIsValid(self, sender):
-
         converter = Converter()
 
         if self.step == 1:
@@ -98,6 +97,8 @@ class Controller:
                 age = int(sender)
 
                 if age < 16:
+                    return False
+                elif age > 44:
                     return False
 
                 return True

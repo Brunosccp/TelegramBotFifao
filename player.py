@@ -1,4 +1,4 @@
-from enums import Converter
+from converter import Converter
 
 class Player:
 

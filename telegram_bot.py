@@ -11,7 +11,7 @@ from controller import Controller
 
 from player import Player
 from predictor import Predictor
-from enums import Converter
+from converter import Converter
 import time
 
 TOKEN='971659272:AAF03CZJzlo0uLbuGJ6kprFW9dpTRttVFws'
@@ -36,15 +36,17 @@ try:
     def echo(bot, update):
         goToNextStep = True
 
-        returnTxt = update.message.text
-        textos = controller.getText(returnTxt)
+        answer = update.message.text
+        print("Answer: " + answer)
+
+        textos = controller.getText(answer)
 
         #when answer is None, means the answer was invalid
         if textos == None:
             textos = ["Cara, o que você escreveu não tem lógica, coesão, inteligência, digita de novo"]
             goToNextStep = False
         else: 
-            player.fill(returnTxt, controller.step)
+            player.fill(answer, controller.step)
 
         for texto in textos:
             bot.sendChatAction(chat_id=update.message.chat_id, action = telegram.ChatAction.TYPING)
@@ -61,11 +63,16 @@ try:
             converter = Converter()
             strValue = converter.convertStringValue(value)
 
-            texto = "O seu jogador vale aproximadamente " + strValue
+            textos.clear()
+            textos.append("O seu jogador vale aproximadamente " + strValue)
+            textos.append("Então, quer que eu veja mais um jogador? Neste caso, qual é o overall dele?")
 
-            bot.sendChatAction(chat_id=update.message.chat_id, action = telegram.ChatAction.TYPING)
-            time.sleep(2)
-            bot.send_message(chat_id=update.message.chat_id, text=texto, parse_mode=telegram.ParseMode.HTML, action = telegram.ChatAction.TYPING)
+            for texto in textos:
+                bot.sendChatAction(chat_id=update.message.chat_id, action = telegram.ChatAction.TYPING)
+                time.sleep(2)
+                bot.send_message(chat_id=update.message.chat_id, text=texto, parse_mode=telegram.ParseMode.HTML, action = telegram.ChatAction.TYPING)
+                
+            controller.step = 1
 
     echo_handler = MessageHandler(Filters.text, echo)
     dispatcher.add_handler(echo_handler)

@@ -14,10 +14,6 @@ class Converter:
         return -1
 
     def checkPosition(self, position):
-        print(position)
-        print(positions)
-        print(positions.__contains__(position))
-
         if positions.__contains__(position):
             return True
         else:
